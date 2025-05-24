@@ -3,9 +3,9 @@ This project is interested in the city of Paris airbnb listing prices, whose pri
 To this purpose, we have collected Airbnb listing data in Paris from [insideairbnb website](https://insideairbnb.com/fr/get-the-data/).
 Those data will serve to achieve the two goals of the project: 
 1. Build a machine learning model to predict accomodation prices by combining data from multiple online platforms like SeLoger, Leboncoin, and Airbnb;
-2. Quantity the relative importance of individual apartment features and location information
-
+2. Quantity the relative importance of individual apartment features and location information. 
 To carry out the project, the CRISP-DM is adopted.
+---
 
 ## Goals
 - Scrape housing data from several French platforms
