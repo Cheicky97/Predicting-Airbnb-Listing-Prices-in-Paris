@@ -14,13 +14,13 @@ To carry out the project, the CRISP-DM is adopted.
 - Build and evaluate regression models to predict housing prices
 - Create a Power BI dashboard for interactive visualization
 - Deploy the model as a web application
-
+---
 ## Tech Stack
 - Python (pandas, sklearn, matplotlib/seaborn, requests/BeautifulSoup)
 - Jupyter Notebooks
 - Power BI
 - Git/GitHub for version control
-
+---
 ## Status
 ✅ Project initialized
 ✅ Business understanding
