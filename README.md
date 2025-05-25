@@ -8,10 +8,10 @@ To carry out the project, the CRISP-DM is adopted.
 ---
 
 ## 📍 Goals
-- Scrape housing data from several French platforms
-- Combine and clean multi-source datasets
+- Scrape Airbnb listing prices data from [Inside Airbnb website](https://insideairbnb.com/fr/get-the-data/)
+- Understand and clean the dataset.
 - Perform EDA (Exploratory Data Analysis)
-- Build and evaluate regression models to predict housing prices
+- Build and evaluate regression models to predict accomodation prices
 - Create a Power BI dashboard for interactive visualization
 - Deploy the model as a web application
 ---
