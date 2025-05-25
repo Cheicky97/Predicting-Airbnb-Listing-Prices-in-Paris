@@ -15,7 +15,7 @@ To carry out the project, the CRISP-DM is adopted.
 - Create a Power BI dashboard for interactive visualization
 - Deploy the model as a web application
 ---
-## Tech Stack
+## 🧰Tech Stack
 - Python (pandas, sklearn, matplotlib/seaborn, requests/BeautifulSoup)
 - Jupyter Notebooks
 - Power BI
