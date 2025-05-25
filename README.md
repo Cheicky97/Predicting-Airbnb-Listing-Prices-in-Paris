@@ -1,4 +1,4 @@
-# Real Estate Price Prediction Using Multi-source Data
+# 🚀 Real Estate Price Prediction Using Multi-source Data
 This project is interested in the city of Paris airbnb listing prices, whose prices, we want to accurately estimate and get insights on the importance of each individual features.
 To this purpose, we have collected Airbnb listing data in Paris from [Inside Airbnb website](https://insideairbnb.com/fr/get-the-data/).
 Those data will serve to achieve the two goals of the project: 
