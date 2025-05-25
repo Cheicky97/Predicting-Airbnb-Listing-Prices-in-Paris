@@ -7,7 +7,7 @@ Those data will serve to achieve the two goals of the project:
 To carry out the project, the CRISP-DM is adopted.
 ---
 
-## Goals
+## 📍 Goals
 - Scrape housing data from several French platforms
 - Combine and clean multi-source datasets
 - Perform EDA (Exploratory Data Analysis)
