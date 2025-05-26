@@ -27,6 +27,7 @@ To carry out the project, the CRISP-DM is adopted.
 ✅ Business understanding
 
 ✅ Data collection
+
 ✅ Data understanding
 
 🚧 Data Preparation in progress
