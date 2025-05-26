@@ -4,17 +4,6 @@ import seaborn as sns
 from scipy.stats import ttest_ind, chi2_contingency, f_oneway
 from matplotlib.patches import Patch
 
-def detect_outliers_iqr(data_desc_T):
-    q1 = data_desc_T['25%'].values
-    q3 = data_desc_T['75%'].values
-    iqr = q3 - q1
-    upper_bound = q3 + 1.5 * iqr
-    lower_bound = q1 - 1.5 * iqr
-    mask = data_desc_T['max'].values > upper_bound
-    features = data_desc_T.index[mask]
-    data_desc_T['outlier']=mask
-    return data_desc_T.outlier, features
-
 class PlotData:
     """
     Ploting dataset
@@ -80,7 +69,7 @@ class TestDataset:
     """
     Perform test on dataset
     """
-    def __init__(self, df:pd.DataFrame, target:str):
+    def __init__(self, df:pd.DataFrame, target:str, drop_num:list=None):
         """
         ----------
         df: (pd.DataFrame) the dataset
@@ -88,11 +77,16 @@ class TestDataset:
         """
         #drop_cat: list of categorical type columns to be drop from the analysis
         #drop_num: list of numerical type columns to be drop from the analysis
-        self.data = df
+        self.data = df.copy()
         self.target = target
         self.data['is_missing']= self.data[target].isnull()
         self.categorical_cols = self.data.select_dtypes(include='object').columns
-        self.numerical_cols = self.data.select_dtypes(include=['int', 'float']).columns.drop(target)
+        if drop_num is not None:
+            self.numerical_cols = self.data.select_dtypes(include=['int', 'float']).columns.drop(drop_num)
+        else:
+            self.numerical_cols = self.data.select_dtypes(include=['int', 'float']).columns
+        self.data_desc_T = self.data[self.numerical_cols].describe().T
+        self.numerical_cols = self.numerical_cols.drop(target)
         self.cat_data = self.data[self.categorical_cols]
         self.num_data = self.data[self.numerical_cols]
         self.results = []
@@ -177,3 +171,17 @@ class TestDataset:
         """
         self.total_results = pd.DataFrame(self.results).sort_values('p_value')
         print(f'missingness dependent on {(self.total_results['p_value'] < pthreshold).mean() * 100:2.0f}% of attributes')
+
+    def detect_outliers_iqr(self):
+        """
+        Detect oulier in numerical features
+        """
+        q1 = self.data_desc_T['25%'].values
+        q3 = self.data_desc_T['75%'].values
+        iqr = q3 - q1
+        upper_bound = q3 + 1.5 * iqr
+        lower_bound = q1 - 1.5 * iqr
+        mask = self.data_desc_T['max'].values > upper_bound
+        features = self.data_desc_T.index[mask]
+        self.data_desc_T['outlier']=mask
+        return features
