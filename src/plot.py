@@ -4,6 +4,17 @@ import seaborn as sns
 from scipy.stats import ttest_ind, chi2_contingency, f_oneway
 from matplotlib.patches import Patch
 
+def detect_outliers_iqr(data_desc_T):
+    q1 = data_desc_T['25%'].values
+    q3 = data_desc_T['75%'].values
+    iqr = q3 - q1
+    upper_bound = q3 + 1.5 * iqr
+    lower_bound = q1 - 1.5 * iqr
+    mask = data_desc_T['max'].values > upper_bound
+    features = data_desc_T.index[mask]
+    data_desc_T['outlier']=mask
+    return data_desc_T.outlier, features
+
 class PlotData:
     """
     Ploting dataset
