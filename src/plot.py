@@ -65,11 +65,49 @@ class PlotData:
         plt.title("Distribution of Data Types")
         plt.show()
 
+    @staticmethod
+    def countplot__cat_var(df:pd.DataFrame, categorical_cols:list, figsize=(15,20), max_ncols:int=3, rotation:float=50, **kwargs):
+        """
+        plot the count plot for a list of categorical columns that columns names is indicated in the argument
+        -------
+        df: pandas.DataFrame, the dataset
+        categorical_cols: list of categorical columns to be plotted 
+        max_ncols: int, the maximum number of axes per row (of the figure)
+        rotation: float, rotation of xticks
+        **kwargs: dict, argument for setting more optin in the sns.countplot
+        """
+        num_of_axes = len(categorical_cols)
+        ncols = min(max_ncols, num_of_axes)
+        nrows = num_of_axes // ncols
+        num_of_axes_is_multiple_ncols = num_of_axes%ncols
+        nrows = nrows + 1 if num_of_axes_is_multiple_ncols else nrows
+
+        fig, axs = plt.subplots(ncols=ncols, nrows=nrows, figsize=figsize)
+        axs = axs.flatten()
+        axes = axs[:num_of_axes]
+        
+        # remove all axes for which there is no column data to be plotted
+        if num_of_axes_is_multiple_ncols:
+            for i in range(num_of_axes, len(axs)):
+                fig.delaxes(axs[i])
+        
+
+
+        for ax, col in list(zip(axes, categorical_cols)):
+            sns.countplot(data=df, x=col, ax=ax, **kwargs)
+            ax.set_title(col)
+            ax.tick_params(axis='x', rotation=rotation)
+        plt.tight_layout()
+        plt.show()
+
+
+        
+        
 class TestDataset:
     """
     Perform test on dataset
     """
-    def __init__(self, df:pd.DataFrame, target:str, drop_num:list=None):
+    def __init__(self, df:pd.DataFrame, target:str, drop_num:list=None, for_missing=True):
         """
         ----------
         df: (pd.DataFrame) the dataset
@@ -79,7 +117,8 @@ class TestDataset:
         #drop_num: list of numerical type columns to be drop from the analysis
         self.data = df.copy()
         self.target = target
-        self.data['is_missing']= self.data[target].isnull()
+        self.for_missing = for_missing
+        self.targeted_data = self.data[target].isnull() if for_missing else self.data[target]
         self.categorical_cols = self.data.select_dtypes(include='object').columns
         if drop_num is not None:
             self.numerical_cols = self.data.select_dtypes(include=['int', 'float']).columns.drop(drop_num)
@@ -96,27 +135,31 @@ class TestDataset:
         Change target
         """
         if target != None:
-            missing_data = self.data[target].isnull()
+            targeted_data = self.data[target].isnull() if self.for_missing else self.data[target]
         else:
-            missing_data = self.data['is_missing']
-        return missing_data
+            targeted_data = self.targeted_data
+        return targeted_data
 
 
-    def numeric_vs_categoricals(self, target:str=None):
+    def numeric_vs_categoricals(self, target:str=None, return_p_value=False):
         """
         Function for numeric vs categorical (ANOVA)
         -----
         target:str, optional
             if test for a different attribute than the target.
         """
-        missing_data = self.change_target(target)
+        p_value = []
+        targeted_data = self.change_target(target)
         for col in self.categorical_cols:
-            groups = [missing_data[self.data[col]==val] for val in self.data[col].unique()]
+            groups = [targeted_data[self.cat_data[col]==val] for val in self.cat_data[col].unique()]
             try:
                 _, p = f_oneway(*groups)
                 self.results.append({'feature': col, 'p_value': p})
+                p_value.append({'feature': col, 'p_value': p})
             except:
                 continue
+        if return_p_value:
+            return pd.DataFrame(p_value).sort_values('p_value')
 
     def categorical_vs_categorical(self, target:str=None):
         """
@@ -131,9 +174,9 @@ class TestDataset:
             None
             p_value are append to the variable results which is an attribute of this class
         """
-        missing_data = self.change_target(target)
+        targeted_data = self.change_target(target)
         for col in self.categorical_cols:
-            contengency = pd.crosstab(self.data[col], missing_data)
+            contengency = pd.crosstab(self.cat_data[col], targeted_data)
             if contengency.shape[0] < 2 or contengency.shape[1] != 2:
                 continue
             try:
@@ -153,10 +196,10 @@ class TestDataset:
             None
             p_value are append to the variable results which is an attribute of this class
         """
-        missing_data = self.change_target(target)
+        targeted_data = self.change_target(target)
         for col in self.numerical_cols:
-            group1 = self.data[missing_data][col].dropna() #rows where price is missing
-            group2 = self.data[~missing_data][col].dropna() #rows where price is not missing
+            group1 = self.data[targeted_data][col].dropna() #rows where price is missing
+            group2 = self.data[~targeted_data][col].dropna() #rows where price is not missing
             
             if len(group1) > 0 and len(group2) > 0:
                 _, p = ttest_ind(group1, group2, equal_var=False)
