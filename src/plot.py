@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 from scipy.stats import ttest_ind, chi2_contingency, f_oneway
 from matplotlib.patches import Patch
+from sklearn.feature_selection import mutual_info_regression
 
 class PlotData:
     """
@@ -141,7 +142,7 @@ class TestDataset:
         return targeted_data
 
 
-    def numeric_vs_categoricals(self, target:str=None, return_p_value=False):
+    def numeric_vs_categoricals(self, target:str=None, return_p_value=False, list_cols=None):
         """
         Function for numeric vs categorical (ANOVA)
         -----
@@ -150,8 +151,9 @@ class TestDataset:
         """
         p_value = []
         targeted_data = self.change_target(target)
-        for col in self.categorical_cols:
-            groups = [targeted_data[self.cat_data[col]==val] for val in self.cat_data[col].unique()]
+        cols = list_cols if list_cols is not None else self.categorical_cols
+        for col in cols:
+            groups = [group["price"].dropna().values for _, group in self.data.groupby(col)]
             try:
                 _, p = f_oneway(*groups)
                 self.results.append({'feature': col, 'p_value': p})
@@ -160,6 +162,23 @@ class TestDataset:
                 continue
         if return_p_value:
             return pd.DataFrame(p_value).sort_values('p_value')
+
+    def make_mi_scores(self, target):
+        """
+        Calculate mutual information between features and target variable
+        ---------
+        target: str, is the target variable name in the dataset
+        """
+        X = self.data.copy()
+        y = X.pop(target)
+        for col in self.data.select_dtypes("object").columns:
+            X[col], _ = X[col].factorize()
+        
+        discrete_features = X.dtypes == int
+        mi_scores = mutual_info_regression(X, y, discrete_features=discrete_features)
+        mi_scores = pd.Series(mi_scores, name="MI Scores", index=X.columns)
+        mi_scores = mi_scores.sort_values(ascending=False)
+        return mi_scores
 
     def categorical_vs_categorical(self, target:str=None):
         """
