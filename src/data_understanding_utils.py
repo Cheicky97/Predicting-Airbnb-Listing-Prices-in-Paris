@@ -4,6 +4,13 @@ import seaborn as sns
 from scipy.stats import ttest_ind, chi2_contingency, f_oneway
 from matplotlib.patches import Patch
 from sklearn.feature_selection import mutual_info_regression
+from numpy import prod
+
+def infos_missing(data:pd.DataFrame):
+    print(f'There are {100 * data.isnull().sum().sum() / prod(data.shape):2.0f}% of missing data.')
+
+def infos_duplicates(data, id:str):
+    print(f'There are {data.duplicated([id]).sum()} duplicates')
 
 class PlotData:
     """
